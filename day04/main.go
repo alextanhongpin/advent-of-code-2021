@@ -10,7 +10,6 @@ import (
 
 const (
 	Row = 5
-	Col = 5
 )
 
 func main() {
@@ -77,45 +76,44 @@ func play(input string) []int {
 	var scores []int
 	for i := range plays {
 		for board := range boards {
-			if win(boards[board], plays[:i]) {
-				won := boards[board]
-				total := 0
-				var boardNumbers []int
-				for _, row := range won {
-					for _, col := range row {
-						boardNumbers = append(boardNumbers, col)
-					}
-				}
-				set := make(map[int]bool)
-				for _, play := range plays[:i] {
-					set[play] = true
-				}
-				for _, n := range boardNumbers {
-					if !set[n] {
-						total += n
-					}
-				}
-				scores = append(scores, total*plays[i-1])
-				delete(boards, board)
+			if !win(boards[board], plays[:i]) {
+				continue
 			}
+			set := make(map[int]bool)
+			for _, play := range plays[:i] {
+				set[play] = true
+			}
+
+			var total int
+			for _, row := range boards[board] {
+				for _, col := range row {
+					if set[col] {
+						continue
+					}
+					total += col
+				}
+			}
+			scores = append(scores, total*plays[i-1])
+			delete(boards, board)
 		}
 	}
 	return scores
 }
 
 func win(board [][]int, numbers []int) bool {
+	played := make(map[int]bool)
+	for _, n := range numbers {
+		played[n] = true
+	}
 	for i := 0; i < len(board); i++ {
 		var rowMatch, colMatch int
 		for j := 0; j < len(board[i]); j++ {
-			for _, n := range numbers {
-				if board[i][j] == n {
-					rowMatch++
-				}
-				if board[j][i] == n {
-					colMatch++
-				}
+			if played[board[i][j]] {
+				rowMatch++
 			}
-
+			if played[board[j][i]] {
+				colMatch++
+			}
 		}
 		if colMatch == len(board) || rowMatch == len(board) {
 			return true

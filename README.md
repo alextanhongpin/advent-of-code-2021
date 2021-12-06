@@ -13,14 +13,15 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
 func main() {
 	fmt.Println("part1 (example):", part1(example))
-	fmt.Println("part1 (input):", part1(input))
-	fmt.Println("part2 (example):", part2(example))
-	fmt.Println("part2 (input):", part2(input))
+	//fmt.Println("part1 (input):", part1(input))
+	//fmt.Println("part2 (example):", part2(example))
+	//fmt.Println("part2 (input):", part2(input))
 }
 
 func parse(input string) []string {
@@ -45,7 +46,14 @@ func part2(input string) int {
 	return 0
 }
 
+func toInt(s string) int {
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		panic(err)
+	}
+	return n
+}
+
 var example = ``
 var input = ``
-
 ```

@@ -35,20 +35,18 @@ func solve(input string, days int) int {
 
 	for n := 0; n < days; n++ {
 		created := make(map[int]int)
-		for i := 0; i < 10; i++ {
-			k := i
+		for k := 0; k < 10; k++ {
 			v, ok := result[k]
 			if !ok {
 				continue
 			}
+			result[k] -= v
 			if k == 0 {
-				delete(result, k)
 				created[6] += v
 				created[8] += v
-				continue
+			} else {
+				result[k-1] += v
 			}
-			result[k] -= v
-			result[k-1] += v
 		}
 		for k, v := range created {
 			result[k] += v

@@ -31,28 +31,26 @@ type point struct {
 	x, y int
 }
 
+var adjacents = []point{
+	{-1, -1},
+	{0, -1},
+	{1, -1},
+	{-1, 0},
+	{1, 0},
+	{-1, 1},
+	{0, 1},
+	{1, 1},
+}
+
 func part1(input string, rounds int) int {
 	lines := parse(input)
 
 	m := make(map[point]int)
-	var s []point
 	for y, line := range lines {
 		for x, ch := range line {
 			p := point{x: x, y: y}
 			m[p] = toInt(string(ch))
-			s = append(s, p)
 		}
-	}
-
-	adjacents := []point{
-		{-1, -1},
-		{0, -1},
-		{1, -1},
-		{-1, 0},
-		{1, 0},
-		{-1, 1},
-		{0, 1},
-		{1, 1},
 	}
 
 	flashed := make(map[point]bool)
@@ -86,7 +84,7 @@ func part1(input string, rounds int) int {
 	}
 
 	for i := 0; i < rounds; i++ {
-		for _, c := range s {
+		for c := range m {
 			do_flash(c)
 		}
 		// Reset at the end of every round
@@ -100,24 +98,12 @@ func part2(input string) int {
 	lines := parse(input)
 
 	m := make(map[point]int)
-	var s []point
+
 	for y, line := range lines {
 		for x, ch := range line {
 			p := point{x: x, y: y}
 			m[p] = toInt(string(ch))
-			s = append(s, p)
 		}
-	}
-
-	adjacents := []point{
-		{-1, -1},
-		{0, -1},
-		{1, -1},
-		{-1, 0},
-		{1, 0},
-		{-1, 1},
-		{0, 1},
-		{1, 1},
 	}
 
 	flashed := make(map[point]bool)
@@ -152,9 +138,10 @@ func part2(input string) int {
 
 	for {
 		round++
-		for _, c := range s {
+		for c := range m {
 			do_flash(c)
 		}
+
 		// Reset at the end of every round
 		flashed = make(map[point]bool)
 

@@ -11,10 +11,10 @@ import (
 
 func main() {
 	s := NewSolver()
-	fmt.Println("part1 (example):", s.WithInput(example).Part1(14)) // 1588
+	fmt.Println("part1 (example):", s.WithInput(example).Part1(10)) // 1588
 	fmt.Println("part1 (input):", s.WithInput(input).Part1(10))     // 2068
-	//fmt.Println("part2 (example):", s.WithInput(example).Part1(40)) // 0
-	//fmt.Println("part2 (input):", s.WithInput(input).Part1(40))     // 0
+	fmt.Println("part2 (example):", s.WithInput(example).Part1(40)) // 2188189693529
+	fmt.Println("part2 (input):", s.WithInput(input).Part1(40))     // 2158894777814
 }
 
 type Solver struct {
@@ -34,57 +34,38 @@ func (s *Solver) WithInput(input string) *Solver {
 }
 
 func (s *Solver) Part1(rounds int) int {
-	r := s.reaction
+	cnt := toCounter(s.reaction, 1)
+	ctr := toCounter(s.reaction, 2)
+
 	for i := 0; i < rounds; i++ {
-		r = s.run(r)
+		s.run(cnt, ctr)
 	}
-
-	count := make(map[rune]int)
-	for _, ch := range r {
-		count[ch]++
-	}
-
 	var result []int
-	for _, v := range count {
-		result = append(result, v)
+	for _, n := range cnt {
+		result = append(result, n)
 	}
+
 	sort.Ints(result)
+
 	return result[len(result)-1] - result[0]
 }
 
-func (s *Solver) run(reaction string) string {
-	var sb strings.Builder
-	for i := 0; i < len(reaction)-1; i++ {
-		curr := string(reaction[i])
-		next := string(reaction[i+1])
-		v, ok := s.react[curr+next]
-		if ok {
-			sb.WriteString(curr + v)
-			if i == len(reaction)-2 {
-				sb.WriteString(next)
-			}
-		} else {
-			sb.WriteString(curr + next)
-		}
-	}
-	return sb.String()
-}
-
-func (s *Solver) runReaction(counter map[string]int) map[string]int {
-	newCounter := make(map[string]int)
-	for k, v := range counter {
-		newCounter[k] = v
-	}
-	for k := range counter {
-		v, ok := s.react[k]
+func (s *Solver) run(cnt, ctr map[string]int) {
+	newctr := make(map[string]int)
+	for k, v := range ctr {
+		c, ok := s.react[k]
 		if ok {
 			parts := strings.Split(k, "")
-			left, right := parts[0], parts[1]
-			newCounter[left+v]++
-			newCounter[v+right]++
+			l, r := parts[0], parts[1]
+			newctr[l+c] += v
+			newctr[c+r] += v
+			cnt[c] += v
 		}
+		delete(ctr, k)
 	}
-	return newCounter
+	for k, v := range newctr {
+		ctr[k] += v
+	}
 }
 
 func (s *Solver) Part2() int {
@@ -129,6 +110,22 @@ func toInt(s string) int {
 	return n
 }
 
+func toCounter(s string, n int) map[string]int {
+	result := make(map[string]int)
+	for i := 0; i < len(s)-n+1; i++ {
+		result[s[i:i+n]]++
+	}
+	return result
+}
+
+func copyMap(m map[string]int) map[string]int {
+	res := make(map[string]int)
+	for k, v := range m {
+		res[k] = v
+	}
+	return res
+}
+
 var example = `NNCB
 
 CH -> B
@@ -147,6 +144,7 @@ BB -> N
 BC -> B
 CC -> N
 CN -> C`
+
 var input = `KFFNFNNBCNOBCNPFVKCP
 
 PB -> F

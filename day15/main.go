@@ -3,6 +3,7 @@
 package main
 
 import (
+	"container/heap"
 	"fmt"
 	"strconv"
 	"strings"
@@ -13,7 +14,7 @@ func main() {
 	fmt.Println("part1 (example):", s.WithInput(example).Part1()) // 40
 	fmt.Println("part1 (input):", s.WithInput(input).Part1())     // 435
 	fmt.Println("part2 (example):", s.WithInput(example).Part2()) // 315
-	//fmt.Println("part2 (input):", s.WithInput(input).Part2()) // 0
+	fmt.Println("part2 (input):", s.WithInput(input).Part2())     // 0
 }
 
 type Solver struct {
@@ -44,8 +45,8 @@ type risk struct {
 var directions = []point{
 	{1, 0},
 	{0, 1},
-	//{-1, 0}, // We don't need to backtrack.
-	//{0, -1},
+	{-1, 0},
+	{0, -1},
 }
 
 func (s *Solver) Part1() int {
@@ -55,44 +56,16 @@ func (s *Solver) Part1() int {
 func (s *Solver) solve(state map[point]int, boundary point) int {
 	start := point{x: 0, y: 0}
 	end := boundary
-	stack := []risk{
-		risk{point: start, score: 0},
-	}
+	h := make(minHeap, 1, (boundary.x+1)*(boundary.y+1))
+	h[0] = risk{point: start, score: 0}
 
-	visited := make(map[point]int)
+	visited := make(map[point]bool)
 
-	score := 0
-	for y := 0; y < boundary.y+1; y++ {
-		for x := 0; x < boundary.x+1; x++ {
-			score += state[point{x: x, y: y}]
-			score += state[point{x: y, y: x}]
-		}
-		break
-	}
-
-	for len(stack) > 0 {
-		var tail risk
-		tail, stack = stack[len(stack)-1], stack[:len(stack)-1]
-		//tail, stack = stack[0], stack[1:]
-		if tail.score >= score {
-			continue
-		}
-
+	for h.Len() > 0 {
+		tail := heap.Pop(&h).(risk)
 		if tail.point == end {
-			if tail.score < score {
-				fmt.Println("end", tail)
-				score = tail.score
-			}
-			continue
+			return tail.score
 		}
-
-		if tail.score > score {
-			continue
-		}
-		if n, ok := visited[tail.point]; ok && n < tail.score {
-			continue
-		}
-		visited[tail.point] = tail.score
 
 		for _, dir := range directions {
 			c := tail
@@ -103,10 +76,14 @@ func (s *Solver) solve(state map[point]int, boundary point) int {
 				continue
 			}
 			c.score += s
-			stack = append(stack, c)
+			if visited[c.point] {
+				continue
+			}
+			visited[c.point] = true
+			heap.Push(&h, c)
 		}
 	}
-	return score
+	return 0
 }
 
 func (s *Solver) Part2() int {
@@ -150,15 +127,16 @@ func toInt(s string) int {
 
 func expand(m map[point]int, boundary point) map[point]int {
 	// Repeat 5 times on the x axis.
+	N, MAX := 5, 9
 	res := make(map[point]int)
-	for i := 0; i < 5; i++ {
+	for i := 0; i < N; i++ {
 		// Repeat 5 times on the y axis.
-		for j := 0; j < 5; j++ {
+		for j := 0; j < N; j++ {
 			for y := 0; y < boundary.y+1; y++ {
 				for x := 0; x < boundary.x+1; x++ {
-					n := (m[point{x: x, y: y}] + i + j) % 9
+					n := (m[point{x: x, y: y}] + i + j) % MAX
 					if n == 0 {
-						n = 9
+						n = MAX
 					}
 					dx := x + i*boundary.x + i
 					dy := y + j*boundary.y + j
@@ -168,6 +146,24 @@ func expand(m map[point]int, boundary point) map[point]int {
 		}
 	}
 	return res
+}
+
+type minHeap []risk
+
+func (h minHeap) Len() int      { return len(h) }
+func (h minHeap) Swap(i, j int) { h[i], h[j] = h[j], h[i] }
+func (h minHeap) Less(i, j int) bool {
+	return h[i].score < h[j].score
+}
+func (h *minHeap) Push(x interface{}) {
+	*h = append(*h, x.(risk))
+}
+
+func (h *minHeap) Pop() interface{} {
+	n := len(*h)
+	it := (*h)[n-1]
+	*h = (*h)[:n-1]
+	return it
 }
 
 var example = `1163751742

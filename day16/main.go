@@ -75,18 +75,6 @@ type packet struct {
 }
 
 func parse(b string) (*packet, int) {
-	if len(b) < 6 {
-		return nil, 0
-	}
-	valid := false
-	for _, ch := range b {
-		if ch != '0' {
-			valid = true
-		}
-	}
-	if !valid {
-		return nil, 0
-	}
 	version := bin2Dec(b[:3])
 	typeID := bin2Dec(b[3:6])
 	var subpackets []packet

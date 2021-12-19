@@ -77,9 +77,9 @@ import (
 func main() {
 	s := NewSolver()
 	fmt.Println("part1 (example):", s.WithInput(example).Part1()) // 0
-	fmt.Println("part1 (input):", s.WithInput(input).Part1())     // 0
-	fmt.Println("part2 (example):", s.WithInput(example).Part2()) // 0
-	fmt.Println("part2 (input):", s.WithInput(input).Part2())     // 0
+	//fmt.Println("part1 (input):", s.WithInput(input).Part1())     // 0
+	//fmt.Println("part2 (example):", s.WithInput(example).Part2()) // 0
+	//fmt.Println("part2 (input):", s.WithInput(input).Part2())     // 0
 }
 
 type Solver struct {
@@ -129,6 +129,9 @@ func toInt(s string) int {
 	return n
 }
 
-var example = ``
-var input = ``
+var (
+	example = ``
+	input   = ``
+)
+
 ```
